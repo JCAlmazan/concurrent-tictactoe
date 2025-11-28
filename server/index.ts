@@ -1,34 +1,54 @@
+// /server/index.ts
 import express from "express";
-import { createServer } from "http";
+import http from "http";
 import { Server } from "socket.io";
-import path from "path";
+import cors from "cors";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
-const httpServer = createServer(app);
-const io = new Server(httpServer, {
-  // default options
+const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
+const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
+
+app.use(
+  cors({
+    origin: CLIENT_URL,
+    methods: ["GET", "POST"],
+  })
+);
+
+// simple health check
+app.get("/health", (_, res) => res.send("ok"));
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: CLIENT_URL,
+    methods: ["GET", "POST"],
+  },
 });
 
-// Serve static exported Next.js files (client should run `next build && next export -o out`)
-app.use(express.static(path.join(__dirname, "out")));
-
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "out", "index.html"));
-});
-
-// Simple in-memory rooms state
+/**
+ * Simple in-memory rooms state for the demo:
+ * rooms = {
+ *   [roomId]: { board: (null|'X'|'O')[], players: string[], turn: 'X'|'O' }
+ * }
+ */
 const rooms: Record<
   string,
   { board: (null | "X" | "O")[]; players: string[]; turn: "X" | "O" }
 > = {};
 
 io.on("connection", (socket) => {
-  console.log("socket connected", socket.id);
+  console.log("socket connected:", socket.id);
 
   socket.on("joinRoom", (roomId: string) => {
-    const room = rooms[roomId];
+    let room = rooms[roomId];
+
     if (!room) {
-      // create room
+      // create room, first player is X
       rooms[roomId] = {
         board: Array(9).fill(null),
         players: [socket.id],
@@ -38,7 +58,7 @@ io.on("connection", (socket) => {
       socket.emit("roomJoined", {
         player: "X",
         board: rooms[roomId].board,
-        message: "Esperando segundo jugador...",
+        message: "Waiting for second player...",
       });
       return;
     }
@@ -46,15 +66,15 @@ io.on("connection", (socket) => {
     if (room.players.length === 1) {
       room.players.push(socket.id);
       socket.join(roomId);
-      // notify both players
+      // notify both: second player joins as O
       io.to(roomId).emit("roomJoined", {
         player: "O",
         board: room.board,
-        message: "Partida iniciada",
+        message: "Game started",
       });
       io.to(roomId).emit("updateBoard", {
         board: room.board,
-        message: "Comenzó la partida",
+        message: "Game started",
       });
       return;
     }
@@ -63,11 +83,10 @@ io.on("connection", (socket) => {
     socket.emit("roomFull", {});
   });
 
-  socket.on("play", ({ roomId, index }) => {
+  socket.on("play", ({ roomId, index }: { roomId: string; index: number }) => {
     const room = rooms[roomId];
     if (!room) return;
 
-    // simple mapping: first player is X, second is O
     const playerIndex = room.players.indexOf(socket.id);
     const playerSymbol =
       playerIndex === 0 ? "X" : playerIndex === 1 ? "O" : null;
@@ -75,13 +94,13 @@ io.on("connection", (socket) => {
 
     // check turn
     if (room.turn !== playerSymbol) {
-      socket.emit("invalid", { reason: "No es tu turno" });
+      socket.emit("invalid", { reason: "Not your turn" });
       return;
     }
 
     // check cell empty
     if (room.board[index] !== null) {
-      socket.emit("invalid", { reason: "Casilla ocupada" });
+      socket.emit("invalid", { reason: "Cell occupied" });
       return;
     }
 
@@ -92,30 +111,29 @@ io.on("connection", (socket) => {
 
     io.to(roomId).emit("updateBoard", {
       board: room.board,
-      message: `Jugador ${playerSymbol} jugó`,
+      message: `Player ${playerSymbol} moved`,
     });
   });
 
   socket.on("disconnect", () => {
-    // remove player from any room
+    // remove player from rooms
     for (const [roomId, room] of Object.entries(rooms)) {
       const idx = room.players.indexOf(socket.id);
       if (idx !== -1) {
         room.players.splice(idx, 1);
         io.to(roomId).emit("updateBoard", {
           board: room.board,
-          message: "Un jugador se desconectó",
+          message: "A player disconnected",
         });
-        // if empty, delete room
         if (room.players.length === 0) {
           delete rooms[roomId];
         }
       }
     }
+    console.log("socket disconnected:", socket.id);
   });
 });
 
-const PORT = process.env.PORT || 3000;
-httpServer.listen(PORT, () => {
-  console.log("Server listening on", PORT);
+server.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}, CLIENT_URL=${CLIENT_URL}`);
 });

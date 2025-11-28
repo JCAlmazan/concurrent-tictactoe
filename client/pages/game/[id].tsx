@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import io from "socket.io-client";
+import { io } from "socket.io-client";
 
 let socket: any = null;
 
@@ -9,12 +9,15 @@ export default function Game() {
   const { id } = router.query;
   const [board, setBoard] = useState<(null | "X" | "O")[]>(Array(9).fill(null));
   const [player, setPlayer] = useState<"X" | "O" | null>(null);
-  const [status, setStatus] = useState("Conectando...");
+  const [status, setStatus] = useState("Connecting...");
 
   useEffect(() => {
     if (!id) return;
-    // connect to same origin; socket.io served by server at /socket.io
-    socket = io(undefined, { path: "/socket.io" });
+
+    const BACKEND =
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
+    socket = io(BACKEND, { transports: ["websocket"] });
+
     socket.emit("joinRoom", id);
 
     socket.on("roomJoined", (data: any) => {
@@ -29,7 +32,7 @@ export default function Game() {
     });
 
     socket.on("roomFull", () => {
-      setStatus("Sala completa");
+      setStatus("Room full");
     });
 
     socket.on("invalid", (d: any) => {
@@ -37,7 +40,7 @@ export default function Game() {
     });
 
     socket.on("disconnect", () => {
-      setStatus("Desconectado");
+      setStatus("Disconnected");
     });
 
     return () => {
@@ -70,7 +73,7 @@ export default function Game() {
         padding: 20,
       }}
     >
-      <h2>Partida: {id}</h2>
+      <h2>Match: {id}</h2>
       <div
         style={{
           display: "grid",
@@ -83,7 +86,7 @@ export default function Game() {
         ))}
       </div>
       <p style={{ marginTop: 10 }}>
-        {status} {player ? `| Eres: ${player}` : ""}
+        {status} {player ? `| You: ${player}` : ""}
       </p>
     </main>
   );
