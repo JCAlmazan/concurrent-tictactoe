@@ -10,7 +10,8 @@
     "copy:out": "rm -rf server/dist/out && mv client/out server/dist/out",
     "dev:client": "npm run dev --prefix client",
     "dev:server": "npm run dev --prefix server",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "start": "npm start --prefix server"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
