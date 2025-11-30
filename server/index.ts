@@ -1,9 +1,9 @@
-// /server/index.ts
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
 
 dotenv.config();
 
@@ -11,6 +11,7 @@ const app = express();
 const PORT = process.env.PORT ? Number(process.env.PORT) : 3001;
 const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:3000";
 
+// CORS
 app.use(
   cors({
     origin: CLIENT_URL,
@@ -18,11 +19,21 @@ app.use(
   })
 );
 
+// Serve static exported Next.js frontend
+const outPath = path.join(__dirname, "out");
+app.use(express.static(outPath));
+
+// SPA fallback (so /game/123 works)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(outPath, "index.html"));
+});
+
 // simple health check
 app.get("/health", (_, res) => res.send("ok"));
 
 const server = http.createServer(app);
 
+// Socket.IO
 const io = new Server(server, {
   cors: {
     origin: CLIENT_URL,
