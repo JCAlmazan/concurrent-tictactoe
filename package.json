@@ -1,15 +1,18 @@
 {
   "name": "concurrent-tictactoe",
   "private": true,
+  "version": "1.0.0",
   "scripts": {
     "clean": "rm -rf client/out client/build server/dist server/out",
-    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
-    "build": "npm run clean && npm run build:client && npm run build:server",
+    "build": "npm run clean && npm run build:client && npm run build:server && npm run copy:out",
     "build:client": "npm install --prefix client && npm run build --prefix client",
     "build:server": "npm install --prefix server && npm run build --prefix server",
-    "start": "npm start --prefix server"
+    "copy:out": "rm -rf server/dist/out && mv client/out server/dist/out",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
   },
   "devDependencies": {
-    "concurrently": "^8.2.0"
+    "concurrently": "^8.2.2"
   }
 }

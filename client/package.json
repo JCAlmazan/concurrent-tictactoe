@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && next export",
-    "postbuild": "rm -rf ../server/dist/out && mv out ../server/dist"
+    "build": "next build && next export"
   },
   "dependencies": {
     "next": "13.5.2",
