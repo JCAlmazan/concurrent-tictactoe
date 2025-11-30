@@ -23,11 +23,6 @@ app.use(
 const outPath = path.join(__dirname, "out");
 app.use(express.static(outPath));
 
-// SPA fallback (so /game/123 works)
-app.get("*", (req, res) => {
-  res.sendFile(path.join(outPath, "index.html"));
-});
-
 // simple health check
 app.get("/health", (_, res) => res.send("ok"));
 
@@ -145,6 +140,12 @@ io.on("connection", (socket) => {
   });
 });
 
+// SPA FALLBACK (IMPORTANT: MUST BE LAST ROUTE)
+app.get("*", (_, res) => {
+  res.sendFile(path.join(outPath, "index.html"));
+});
+
+// START SERVER
 server.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}, CLIENT_URL=${CLIENT_URL}`);
 });
