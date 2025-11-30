@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "rm -rf ../server/out && mv out ../server"
+    "postbuild": "rm -rf ../server/dist/out && mv out ../server/dist"
   },
   "dependencies": {
     "next": "13.5.2",
