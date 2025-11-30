@@ -1,12 +1,14 @@
 {
+  "name": "concurrent-tictactoe",
+  "version": "1.0.0",
   "private": true,
   "workspaces": [
     "client",
     "server"
   ],
   "scripts": {
-    "clean": "rm -rf client/out client/build server/dist server/out",
-    "build": "npm run clean && npm run build --workspace client && npm run build --workspace server",
+    "clean": "rm -rf client/out client/build client/.next client/node_modules server/dist server/out server/node_modules",
+    "build": "npm run clean && npm install && npm run build --workspace client && npm run build --workspace server",
     "start": "node server/dist/index.js"
   }
 }
