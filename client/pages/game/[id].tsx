@@ -10,6 +10,7 @@ export default function Game() {
   const [board, setBoard] = useState<(null | "X" | "O")[]>(Array(9).fill(null));
   const [player, setPlayer] = useState<"X" | "O" | null>(null);
   const [status, setStatus] = useState("Connecting...");
+  const [gameOver, setGameOver] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -43,21 +44,44 @@ export default function Game() {
       setStatus("Disconnected");
     });
 
+    socket.on("gameOver", (data: any) => {
+      setBoard(data.board);
+      setGameOver(true);
+      setStatus(data.winner ? `Winner: ${data.winner}` : "Draw!");
+    });
+
+    socket.on("restart", (data: any) => {
+      setBoard(data.board);
+      setGameOver(false);
+      setStatus("Game restarted");
+    });
+
     return () => {
       if (socket) socket.disconnect();
     };
   }, [id]);
 
   function clickCell(i: number) {
-    if (!socket) return;
+    if (!socket || gameOver) return;
     socket.emit("play", { roomId: id, index: i });
+  }
+
+  function restartGame() {
+    if (!socket) return;
+    socket.emit("restart", { roomId: id });
   }
 
   function renderCell(i: number) {
     return (
       <button
         onClick={() => clickCell(i)}
-        style={{ width: 60, height: 60, fontSize: 24 }}
+        disabled={gameOver}
+        style={{
+          width: 60,
+          height: 60,
+          fontSize: 24,
+          cursor: gameOver ? "not-allowed" : "pointer",
+        }}
       >
         {board[i]}
       </button>
@@ -74,6 +98,7 @@ export default function Game() {
       }}
     >
       <h2>Match: {id}</h2>
+
       <div
         style={{
           display: "grid",
@@ -85,9 +110,23 @@ export default function Game() {
           <div key={i}>{renderCell(i)}</div>
         ))}
       </div>
+
       <p style={{ marginTop: 10 }}>
         {status} {player ? `| You: ${player}` : ""}
       </p>
+
+      {gameOver && (
+        <button
+          onClick={restartGame}
+          style={{
+            marginTop: 15,
+            padding: "8px 16px",
+            fontSize: 16,
+          }}
+        >
+          Restart Match
+        </button>
+      )}
     </main>
   );
 }
