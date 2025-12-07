@@ -107,12 +107,15 @@ io.on("connection", (socket) => {
       room.turn = "X";
 
       socket.join(roomId);
-      // notify both: second player joins as O
-      io.to(roomId).emit("roomJoined", {
+
+      // send only to the newly joined socket that it's player O
+      socket.emit("roomJoined", {
         player: "O",
         board: room.board,
         message: "Game started",
       });
+
+      // inform all participants that the game started (does not change assigned players)
       io.to(roomId).emit("updateBoard", {
         board: room.board,
         message: "Game started",

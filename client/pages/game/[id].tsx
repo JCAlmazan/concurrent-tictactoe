@@ -68,7 +68,7 @@ export default function Game() {
 
   function restartGame() {
     if (!socket) return;
-    socket.emit("restart", { roomId: id });
+    socket.emit("restart", id);
   }
 
   function renderCell(i: number) {
