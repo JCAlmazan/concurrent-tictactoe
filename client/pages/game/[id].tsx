@@ -7,6 +7,7 @@ let socket: any = null;
 export default function Game() {
   const router = useRouter();
   const { id } = router.query;
+
   const [board, setBoard] = useState<(null | "X" | "O")[]>(Array(9).fill(null));
   const [player, setPlayer] = useState<"X" | "O" | null>(null);
   const [status, setStatus] = useState("Connecting...");
@@ -72,61 +73,74 @@ export default function Game() {
   }
 
   function renderCell(i: number) {
+    const value = board[i];
+
+    const base =
+      "w-20 h-20 rounded-xl flex items-center justify-center text-3xl font-bold transition";
+
+    if (!value) {
+      return (
+        <button
+          onClick={() => clickCell(i)}
+          disabled={gameOver}
+          className={`${base} bg-white/10 hover:bg-white/20`}
+        />
+      );
+    }
+
+    if (value === "X") {
+      return (
+        <div
+          className={`${base}`}
+          style={{
+            backgroundColor: "#0fd",
+            boxShadow:
+              "0 3px 2px rgba(0, 0, 70, .4), 0 4px 35px #0fd, inset 0 -5px 1px #00e2c0",
+          }}
+        >
+          X
+        </div>
+      );
+    }
+
     return (
-      <button
-        onClick={() => clickCell(i)}
-        disabled={gameOver}
+      <div
+        className={`${base}`}
         style={{
-          width: 60,
-          height: 60,
-          fontSize: 24,
-          cursor: gameOver ? "not-allowed" : "pointer",
+          backgroundColor: "#f6f",
+          boxShadow:
+            "0 3px 2px rgba(0, 0, 70, .4), 0 4px 35px #f6f, inset 0 -5px 1px #e047ff",
         }}
       >
-        {board[i]}
-      </button>
+        O
+      </div>
     );
   }
 
   return (
-    <main
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: 20,
-      }}
-    >
-      <h2>Match: {id}</h2>
+    <main className="min-h-screen flex items-center justify-center bg-[#06066b] text-white">
+      <div className="flex flex-col items-center gap-6">
+        <h2 className="text-lg opacity-80">Match: {id}</h2>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 60px)",
-          gap: 5,
-        }}
-      >
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i}>{renderCell(i)}</div>
-        ))}
+        <div className="grid grid-cols-3 gap-4">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <div key={i}>{renderCell(i)}</div>
+          ))}
+        </div>
+
+        <p className="text-sm opacity-90">
+          {status} {player ? `| You: ${player}` : ""}
+        </p>
+
+        {gameOver && (
+          <button
+            onClick={restartGame}
+            className="mt-4 px-6 py-2 rounded-lg bg-white/20 hover:bg-white/30 transition"
+          >
+            Restart Match
+          </button>
+        )}
       </div>
-
-      <p style={{ marginTop: 10 }}>
-        {status} {player ? `| You: ${player}` : ""}
-      </p>
-
-      {gameOver && (
-        <button
-          onClick={restartGame}
-          style={{
-            marginTop: 15,
-            padding: "8px 16px",
-            fontSize: 16,
-          }}
-        >
-          Restart Match
-        </button>
-      )}
     </main>
   );
 }
