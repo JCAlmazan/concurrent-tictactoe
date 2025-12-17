@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { io } from "socket.io-client";
+import ConcurrencyBanner from "../../components/ConcurrencyBanner";
 
 let socket: any = null;
 
@@ -72,61 +73,60 @@ export default function Game() {
   }
 
   function renderCell(i: number) {
+    const value = board[i];
+    
+    // Base classes
+    let classes = "w-20 h-20 rounded-2xl flex items-center justify-center text-transparent transition-transform duration-100 bg-white/10 hover:bg-white/15 shadow-inner border border-white/5";
+    
+    // Player specific classes (using custom configuration)
+    if (value === "X") {
+      classes += " bg-neon-blue shadow-neon-x scale-105 border-transparent";
+    } else if (value === "O") {
+      classes += " bg-neon-purple shadow-neon-o scale-105 border-transparent";
+    }
+
+    if (gameOver) classes += " cursor-not-allowed opacity-80";
+    else classes += " cursor-pointer hover:scale-105 active:scale-95";
+
     return (
       <button
         onClick={() => clickCell(i)}
         disabled={gameOver}
-        style={{
-          width: 60,
-          height: 60,
-          fontSize: 24,
-          cursor: gameOver ? "not-allowed" : "pointer",
-        }}
+        className={classes}
       >
-        {board[i]}
+        {value}
       </button>
     );
   }
 
   return (
-    <main
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: 20,
-      }}
-    >
-      <h2>Match: {id}</h2>
+    <div className="min-h-screen flex flex-col bg-background text-white font-sans">
+      <ConcurrencyBanner 
+        message={`Consistency Domain: ${id}`}
+        subMessage={status} 
+      />
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 60px)",
-          gap: 5,
-        }}
-      >
-        {Array.from({ length: 9 }).map((_, i) => (
-          <div key={i}>{renderCell(i)}</div>
-        ))}
-      </div>
+      <main className="flex flex-col items-center p-5 mt-10">
+        {/* Visual Cue for Player */}
+        <div className="mb-8 opacity-80 font-mono text-sm tracking-wider bg-black/20 px-4 py-2 rounded-lg border border-white/10 shadow-sm">
+             [Local Thread: {player || "Observer"}]
+        </div>
 
-      <p style={{ marginTop: 10 }}>
-        {status} {player ? `| You: ${player}` : ""}
-      </p>
+        <div className="grid grid-cols-3 gap-4 p-6 bg-black/20 rounded-3xl backdrop-blur-md border border-white/10 shadow-2xl">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <div key={i}>{renderCell(i)}</div>
+          ))}
+        </div>
 
-      {gameOver && (
-        <button
-          onClick={restartGame}
-          style={{
-            marginTop: 15,
-            padding: "8px 16px",
-            fontSize: 16,
-          }}
-        >
-          Restart Match
-        </button>
-      )}
-    </main>
+        {gameOver && (
+          <button
+            onClick={restartGame}
+            className="mt-10 bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold py-3 px-8 rounded-full transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95"
+          >
+            Trigger State Reset
+          </button>
+        )}
+      </main>
+    </div>
   );
 }
