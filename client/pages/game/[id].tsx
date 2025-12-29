@@ -76,7 +76,7 @@ export default function Game() {
     const value = board[i];
     
     // Base classes
-    let classes = "w-20 h-20 rounded-2xl flex items-center justify-center text-transparent transition-transform duration-100 bg-white/10 hover:bg-white/15 shadow-inner border border-white/5";
+    let classes = "w-20 h-20 rounded-2xl flex items-center justify-center text-4xl font-bold text-white drop-shadow-md transition-transform duration-100 bg-white/10 hover:bg-white/15 shadow-inner border border-white/5";
     
     // Player specific classes (using custom configuration)
     if (value === "X") {
@@ -94,7 +94,17 @@ export default function Game() {
         disabled={gameOver}
         className={classes}
       >
-        {value}
+        {value === "X" && (
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        )}
+        {value === "O" && (
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" className="drop-shadow-md">
+            <circle cx="12" cy="12" r="9"></circle>
+          </svg>
+        )}
       </button>
     );
   }
