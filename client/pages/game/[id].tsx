@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { io } from "socket.io-client";
 import ConcurrencyBanner from "../../components/ConcurrencyBanner";
+import conceptsConfig from '../../concurrencyConcepts.config.json';
 
 let socket: any = null;
 
@@ -110,18 +111,23 @@ export default function Game() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-white font-sans">
-      <ConcurrencyBanner 
-        message={`Consistency Domain: ${id}`}
-        subMessage={status} 
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-white font-sans p-4">
+      
+      {/* Top Banner - Academic Context */}
+      <div className="w-full max-w-md mb-8">
+        <ConcurrencyBanner 
+        gameState={{
+          id,
+          player,
+          status,
+          gameOver,
+          board
+        }}
       />
+      </div>
 
-      <main className="flex flex-col items-center p-5 mt-10">
-        {/* Visual Cue for Player */}
-        <div className="mb-8 opacity-80 font-mono text-sm tracking-wider bg-black/20 px-4 py-2 rounded-lg border border-white/10 shadow-sm">
-             [Local Thread: {player || "Observer"}]
-        </div>
-
+      {/* Game Board */}
+      <main className="flex flex-col items-center">
         <div className="grid grid-cols-3 gap-4 p-6 bg-black/20 rounded-3xl backdrop-blur-md border border-white/10 shadow-2xl">
           {Array.from({ length: 9 }).map((_, i) => (
             <div key={i}>{renderCell(i)}</div>
@@ -137,6 +143,19 @@ export default function Game() {
           </button>
         )}
       </main>
+      
+      {/* Bottom Banner - Gameplay Context */}
+      <div className="w-full max-w-md mt-8 bg-white/5 border border-white/10 rounded-xl py-4 text-center backdrop-blur-sm shadow-lg">
+         <p className="text-sm font-medium text-white/90 mb-1">
+            {player ? `Playing as: ${player}` : "Observer Mode"} 
+            <span className="mx-2 opacity-30">|</span> 
+            {status}
+         </p>
+         <div className="h-px w-1/3 bg-white/10 mx-auto my-2"></div>
+         <p className="text-[10px] opacity-50 font-mono tracking-wide">
+            State Machine • Observable Concurrency • Eventual Consistency
+         </p>
+      </div>
     </div>
   );
 }
