@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { io } from "socket.io-client";
 import ConcurrencyBanner from "../../components/ConcurrencyBanner";
-import conceptsConfig from '../../concurrencyConcepts.config.json';
 
 let socket: any = null;
 
