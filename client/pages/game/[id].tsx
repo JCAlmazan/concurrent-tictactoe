@@ -140,7 +140,7 @@ export default function Game() {
       <LanguageToggle />
 
       {/* Top Banner - Academic Context */}
-      <div className="w-full max-w-md mb-6">
+      <div className="w-full max-w-md mb-6 min-h-[160px] flex items-end justify-center">
         <ConcurrencyBanner 
           gameState={{
             id,

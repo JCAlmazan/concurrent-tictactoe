@@ -48,6 +48,11 @@ export default function Home() {
                   placeholder={t.existingState}
                   value={id}
                   onChange={(e) => setId(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && id.trim()) {
+                      router.push(`/game/${id}`);
+                    }
+                  }}
                 />
                 <button className="bg-white/10 hover:bg-white/20 text-white font-bold px-6 rounded-xl border border-white/10 transition-all" onClick={() => router.push(`/game/${id}`)}>
                   {t.sync}
