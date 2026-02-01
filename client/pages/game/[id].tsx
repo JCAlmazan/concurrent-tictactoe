@@ -63,7 +63,8 @@ export default function Game() {
   }, [id]);
 
   function clickCell(i: number) {
-    if (!socket || gameOver) return;
+    if (!socket || gameOver || board[i]) return;
+    setStatus("Syncing..."); // Trigger Eventual Consistency visual
     socket.emit("play", { roomId: id, index: i });
   }
 
@@ -113,21 +114,35 @@ export default function Game() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-background text-white font-sans p-4">
       
       {/* Top Banner - Academic Context */}
-      <div className="w-full max-w-md mb-8">
+      <div className="w-full max-w-md mb-6">
         <ConcurrencyBanner 
-        gameState={{
-          id,
-          player,
-          status,
-          gameOver,
-          board
-        }}
-      />
+          gameState={{
+            id,
+            player,
+            status,
+            gameOver,
+            board
+          }}
+        />
+      </div>
+
+      {/* Room ID Display */}
+      <div className="mb-6 flex flex-col items-center">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold mb-1">Session Protocol</span>
+        <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-full backdrop-blur-sm group hover:border-blue-500/30 transition-all cursor-pointer" onClick={() => {
+          navigator.clipboard.writeText(id as string);
+          alert("Room ID copied to clipboard!");
+        }}>
+          <code className="text-blue-400 font-mono font-bold tracking-wider">{id}</code>
+          <div className="h-3 w-px bg-white/10"></div>
+          <span className="text-[10px] text-white/40 uppercase font-mono group-hover:text-white/60">Share State ID</span>
+        </div>
       </div>
 
       {/* Game Board */}
       <main className="flex flex-col items-center">
-        <div className="grid grid-cols-3 gap-4 p-6 bg-black/20 rounded-3xl backdrop-blur-md border border-white/10 shadow-2xl">
+        <div className="grid grid-cols-3 gap-4 p-6 bg-black/20 rounded-3xl backdrop-blur-md border border-white/10 shadow-2xl relative overflow-hidden group">
+          <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
           {Array.from({ length: 9 }).map((_, i) => (
             <div key={i}>{renderCell(i)}</div>
           ))}
@@ -136,8 +151,9 @@ export default function Game() {
         {gameOver && (
           <button
             onClick={restartGame}
-            className="mt-10 bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold py-3 px-8 rounded-full transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95"
+            className="mt-8 bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold py-3 px-8 rounded-full transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95 flex items-center gap-2"
           >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>
             Trigger State Reset
           </button>
         )}

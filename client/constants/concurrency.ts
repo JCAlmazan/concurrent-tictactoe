@@ -50,6 +50,16 @@ export const CONCURRENCY_CONCEPTS: Record<string, ConcurrencyConcept> = {
     title: "SAFE RESTART",
     text: "Game reset is performed safely. All clients transition to a clean initial state simultaneously."
   },
+  CONCURRENT_SESSIONS: {
+    id: "concurrent_sessions",
+    title: "CONCURRENT SESSIONS",
+    text: "Multiple concurrent sessions are isolated. Each game room maintains independent state and synchronization."
+  },
+  IDEMPOTENCY: {
+    id: "idempotency",
+    title: "IDEMPOTENCY",
+    text: "Actions are idempotent. Repeated or duplicated events do not corrupt the game state."
+  },
   // Default/Fallback
   DISTRIBUTED_SYSTEM: {
     id: "distributed_system",

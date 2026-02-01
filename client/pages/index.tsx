@@ -16,10 +16,7 @@ export default function Home() {
       
       {/* Top Banner - Academic */}
       <div className="w-full max-w-md mb-8">
-        <ConcurrencyBanner
-          message="Distributed State & Concurrency Demo"
-          subMessage="Select a consistency domain (room) to begin"
-        />
+        <ConcurrencyBanner />
       </div>
 
       <main className="flex flex-col items-center w-full max-w-md">
