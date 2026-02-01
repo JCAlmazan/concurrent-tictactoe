@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { io } from "socket.io-client";
 import ConcurrencyBanner from "../../components/ConcurrencyBanner";
+import LanguageToggle from "../../components/LanguageToggle";
+import { useLanguage } from "../../context/LanguageContext";
+import { DICTIONARY } from "../../constants/translations";
 
 let socket: any = null;
 
@@ -12,6 +15,25 @@ export default function Game() {
   const [player, setPlayer] = useState<"X" | "O" | null>(null);
   const [status, setStatus] = useState("Connecting...");
   const [gameOver, setGameOver] = useState(false);
+  const { language } = useLanguage();
+  const t = DICTIONARY[language].ui;
+
+  const translateStatus = (svrMsg: string) => {
+    // Try to find exact match in serverMessages
+    if (t.serverMessages[svrMsg as keyof typeof t.serverMessages]) {
+        return t.serverMessages[svrMsg as keyof typeof t.serverMessages];
+    }
+    // Handle dynamic messages like "Winner: X" or "Player X moved"
+    if (svrMsg.startsWith("Winner: ")) {
+       return svrMsg.replace("Winner:", language === 'es' ? "Ganador:" : "Winner:");
+    }
+    if (svrMsg.includes("moved")) {
+       return svrMsg.replace("moved", language === 'es' ? "movió" : "moved")
+                    .replace("Player", language === 'es' ? "Jugador" : "Player");
+    }
+    // Fallback
+    return svrMsg;
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -114,8 +136,9 @@ export default function Game() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-white font-sans p-4">
-      
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-white font-sans p-4 relative">
+      <LanguageToggle />
+
       {/* Top Banner - Academic Context */}
       <div className="w-full max-w-md mb-6">
         <ConcurrencyBanner 
@@ -131,7 +154,7 @@ export default function Game() {
 
       {/* Room ID Display & Controls */}
       <div className="mb-6 flex flex-col items-center">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold mb-1">Session Protocol</span>
+        <span className="text-[10px] uppercase tracking-[0.2em] text-white/30 font-bold mb-1">{t.sessionProtocol}</span>
         <div className="flex gap-4">
             <button 
                 onClick={() => router.push('/')}
@@ -149,7 +172,7 @@ export default function Game() {
             }}>
             <code className="text-blue-400 font-mono font-bold tracking-wider">{id}</code>
             <div className="h-3 w-px bg-white/10"></div>
-            <span className="text-[10px] text-white/40 uppercase font-mono group-hover:text-white/60">Share State ID</span>
+            <span className="text-[10px] text-white/40 uppercase font-mono group-hover:text-white/60">{t.shareId}</span>
             </div>
         </div>
       </div>
@@ -169,7 +192,7 @@ export default function Game() {
             className="mt-8 bg-white/10 hover:bg-white/20 text-white border border-white/20 font-bold py-3 px-8 rounded-full transition-all hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95 flex items-center gap-2"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>
-            Trigger State Reset
+            {t.triggerReset}
           </button>
         )}
       </main>
@@ -177,9 +200,9 @@ export default function Game() {
       {/* Bottom Banner - Gameplay Context */}
       <div className="w-full max-w-md mt-8 bg-white/5 border border-white/10 rounded-xl py-4 text-center backdrop-blur-sm shadow-lg">
          <p className="text-sm font-medium text-white/90 mb-1">
-            {player ? `Playing as: ${player}` : "Observer Mode"} 
+            {player ? `${t.playingAs}: ${player}` : t.observer} 
             <span className="mx-2 opacity-30">|</span> 
-            {status}
+            {translateStatus(status)}
          </p>
          <div className="h-px w-1/3 bg-white/10 mx-auto my-2"></div>
          <p className="text-[10px] opacity-50 font-mono tracking-wide">
