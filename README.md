@@ -1,111 +1,104 @@
-# Concurrent Tic-Tac-Toe
+# Concurrent Multiplayer Tic-Tac-Toe
 
-A real-time concurrent Tic-Tac-Toe system built with **Next.js**, **TypeScript**, **Express**, and **Socket.IO**.  
-This project is designed for the _Concurrent Programming_ course, focusing on:
+A real-time, distributed, and concurrent system disguised as a Tic-Tac-Toe game.
+Designed as an academic laboratory to visualize and experiment with **Distributed Systems** concepts in a controlled environment.
 
-- Mutual exclusion over shared game state
-- Synchronization between distributed players
-- Real-time communication using event-driven concurrency
-- Controlled concurrent access (max two players per room)
-- Consistency guarantees under simultaneous interactions
+![Project Status](https://img.shields.io/badge/status-active-success.svg)
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-The goal is educational, demonstrating concurrency mechanisms in a clear, observable and practical way.
+## 🎓 Academic Objectives
 
----
+This project is not just a game; it is a **concurrency visualizer**. It demonstrates:
 
-## Architecture Overview
-
-```
-Client (Next.js + TypeScript) → Rendered as static files
-↓ WebSocket events
-Server (Express + Socket.IO) → Manages rooms, turns, state and concurrency rules
-```
-
-- Each match runs in an isolated room.
-- The server serializes moves to prevent race conditions.
-- Shared state (the board) is protected under a simple critical section.
-- Events synchronize both clients in real time.
+*   **Shared State & Synchronization:** How a single "truth" is maintained across multiple clients.
+*   **Race Condition Prevention:** How the server serializes interactions to prevent conflicting state mutations.
+*   **Mutual Exclusion:** Logical locking mechanisms (Strict Turn-Based) to ensure data integrity.
+*   **Eventual Consistency:** Visual feedback on the latency gap between "User Action" and "Server Confirmation".
+*   **Real-Time Authorization:** Validation of actions based on dynamic state (e.g., Turn Tokens).
 
 ---
 
-## Development Setup
+## 🚀 Features
 
-### Requirements
+*   **Real-Time Communication:** Powered by **Socket.IO** (WebSockets) for bi-directional event streams.
+*   **Educational UI:** Dynamic **Concurrency Banners** allowing users to see exactly which theoretical concept is active (e.g., "Mutual Exclusion", "Server Authoritative").
+*   **Bilingual Support (i18n):** Full support for **English** and **Spanish**, making academic concepts accessible to a wider audience.
+*   **Resilient Architecture:** Handles disconnections, room partitioning, and concurrent session management.
+*   **Modern Stack:** 
+    *   **Frontend:** Next.js 13+ (React), TailwindCSS, TypeScript.
+    *   **Backend:** Node.js, Express, Socket.IO Check.
 
-- Node.js 18+
-- npm or yarn
+---
 
-### Install
+## 🛠️ Installation & Setup
+
+You can run the full stack (Client + Server) from the root directory using the simplified scripts.
+
+### Prerequisites
+
+*   Node.js 18+
+*   npm
+
+### 1. Install Dependencies
 
 ```bash
-cd client
-npm install
+# Installs dependencies for BOTH client and server automatically
+npm run build
+```
+*(Note: The build script handles installation steps)*
 
-cd ../server
-npm install
+Alternatively, install manually:
+
+```bash
+cd client && npm install
+cd ../server && npm install
 ```
 
-### Run (development)
+### 2. Run in Development Mode
 
-Two terminals:
-
-**Client**
+This will start both the Next.js frontend (port 3000) and the Node.js backend (port 3001) concurrently.
 
 ```bash
-cd client
+# Run from the root directory
 npm run dev
 ```
 
-**Server**
+*   **Frontend:** [http://localhost:3000](http://localhost:3000)
+*   **Backend:** [http://localhost:3001](http://localhost:3001)
+
+### 3. Production Build
+
+To test the production behavior (Static Export served by Node/Express):
 
 ```bash
-cd server
-npm run dev
-```
-
-### Build for Production
-
-```bash
-cd client
 npm run build
-
-cd ../server
-npm run build
-node dist/index.js
+npm start
 ```
 
 ---
 
-## Deployment (Render)
+## 🧪 How to Experiment (Testing Concurrency)
 
-You can deploy the entire system on a **single Render Web Service**, since the server bundles the exported Next.js client.
-
-Example Render build command:
-
-```bash
-cd client && npm ci && npm run build && cd ../server && npm ci && npm run build
-```
-
-Start command:
-
-```bash
-node dist/index.js
-```
+1.  Open **Two Browser Windows** (e.g., one Incognito).
+2.  In Window A: Click **"Initialize New State"** to create a Room.
+3.  Copy the **Room ID** (click the ID in the protocol bar).
+4.  In Window B: Paste the ID into **"Existing State ID"** and press Enter.
+5.  Observe the **Concurrency Banners** changing as you play.
+6.  Try to play out of turn or disconnect one client to see how the system enforces **Consistency**.
 
 ---
 
-## Academic Focus
+## 📂 Project Structure
 
-This project highlights:
-
-- Concurrency models in distributed interactive systems
-- Event-driven synchronization
-- State consistency under simultaneous operations
-- Practical application of mutual exclusion (shared board)
-- Controlled admission to concurrent processes (two players max)
+*   **/client**: Next.js Application.
+    *   `pages/game/[id].tsx`: Main game loop and socket logic.
+    *   `components/ConcurrencyBanner.tsx`: Educational component for visualizing concepts.
+    *   `constants/translations.ts`: Dictionary for i18n.
+*   **/server**: Node.js Application.
+    *   `index.ts`: The "Truth Source". Handles the Event Loop, Room State, and Validations.
 
 ---
 
-## License
+## 📄 License
 
 MIT License.
