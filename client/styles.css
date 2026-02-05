@@ -1,6 +1,7 @@
-button {
-  cursor: pointer;
-}
-input {
-  padding: 6px;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-background text-white min-h-screen font-sans;
 }

@@ -207,9 +207,19 @@ io.on("connection", (socket) => {
     room.turn = "X";
     room.finished = false;
 
-    io.to(roomId).emit("restart", {
-      board: room.board,
-      message: "Game restarted",
+    // Swap players to alternate who is X and who is O for the next game
+    if (room.players.length === 2) {
+      [room.players[0], room.players[1]] = [room.players[1], room.players[0]];
+    }
+
+    // Notify each player of the restart and their (potentially new) role
+    room.players.forEach((pid, index) => {
+      const assignedSymbol = index === 0 ? "X" : "O";
+      io.to(pid).emit("restart", {
+        board: room.board,
+        player: assignedSymbol,
+        message: "Game restarted - Roles swapped",
+      });
     });
   });
 
